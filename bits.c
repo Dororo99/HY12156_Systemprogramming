@@ -1,7 +1,7 @@
 /*
  * CS:APP Data Lab
  *
- * <Please put your name and userid here>
+ * <2021033372_임도현>
  *
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -175,7 +175,7 @@ NOTES:
  */
 int bitAnd(int x, int y)
 {
-   return ~(x | y);
+   return ~(~x | ~y);
 }
 /*
  * getByte - Extract byte n from word x
@@ -187,7 +187,7 @@ int bitAnd(int x, int y)
  */
 int getByte(int x, int n)
 {
-   return 2;
+   return ((x >> (n << 3)) & 0xFF);
 }
 /*
  * bang - Compute !x without using !
@@ -198,7 +198,7 @@ int getByte(int x, int n)
  */
 int bang(int x)
 {
-   return 2;
+   return ((x | (~x + 1)) >> 31) + 1;
 }
 /*
  * tmin - return minimum two's complement integer
@@ -208,7 +208,7 @@ int bang(int x)
  */
 int tmin(void)
 {
-   return 2;
+   return 0x7FFFFFFF + 1;
 }
 /*
  * negate - return -x
@@ -219,7 +219,7 @@ int tmin(void)
  */
 int negate(int x)
 {
-   return 2;
+   return ~x + 1;
 }
 /*
  * isPositive - return 1 if x > 0, return 0 otherwise
@@ -230,7 +230,7 @@ int negate(int x)
  */
 int isPositive(int x)
 {
-   return 2;
+   return (!(x >> 31)) ^ !x;
 }
 /*
  * float_neg - Return bit-level equivalent of expression -f for
@@ -245,7 +245,12 @@ int isPositive(int x)
  */
 unsigned float_neg(unsigned uf)
 {
-   return 2;
+   int sign = 0x80000000 ^ uf;
+   int exp = 0x7F800000 & uf;
+   int frac = 0x007FFFFF & uf;
+   if ((exp == 0x7F800000) && frac)
+      return uf;
+   return sign;
 }
 /*
  * float_twice - Return bit-level equivalent of expression 2*f for
@@ -260,5 +265,50 @@ unsigned float_neg(unsigned uf)
  */
 unsigned float_twice(unsigned uf)
 {
-   return 2;
+   unsigned sign = uf & 0x80000000;
+   unsigned exp = (uf & 0x7F800000) >> 23;
+   unsigned frac = uf & 0x007FFFFF;
+
+   if (exp == 0xFF)
+   {
+      return uf;
+   }
+   else if (exp == 0)
+   {
+      frac <<= 1;
+      if (frac >= 0x00800000)
+      {
+         exp = 1;
+         frac &= 0x007FFFFF;
+      }
+   }
+   else
+   {
+      exp += 1;
+      if (exp == 0xFF)
+         frac = 0;
+   }
+
+   return sign | (exp << 23) | frac;
+
+   // int sign = uf & 0x80000000;
+   // int exp = 0x7F800000 & uf;
+   // int frac = 0x007FFFFF & uf;
+   // if((exp>>23) == 0xFF)
+   // //if((exp == 0x7F800000) && frac)
+   // 	return uf;
+   // exp >> 23;
+   // if(exp == 0){
+   // 	frac <<= 1;
+   // 	if(frac >= 0x00800000){
+   // 		exp = 1;
+   // 		frac &=0x007FFFFF;
+   // 		}
+   // } else{
+   // 	exp+=1;
+   // 	if(exp==0xFF){
+   // 		frac=0;
+   // 	}
+   // }
+   // return sign | (exp << 23) | frac;
 }
